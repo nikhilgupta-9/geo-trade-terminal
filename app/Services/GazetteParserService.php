@@ -103,6 +103,9 @@ class GazetteParserService
 
                     $revisions[] = $revision;
 
+                    // Broadcast live WebSocket ticker event
+                    event(new \App\Events\LiveTariffTickerEvent($revision));
+
                     // Dispatch alerts to affected users
                     $this->alertDispatcher->dispatchForRevision($revision);
                 }

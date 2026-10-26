@@ -54,6 +54,67 @@ class CalculatorController extends Controller
         ]);
     }
 
+    /**
+     * Public throttled landed-cost simulation endpoint.
+     */
+    public function simulateLandedCost(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'unit_fob' => 'required|numeric|min:0',
+            'quantity' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|string|size:3',
+            'hs_code' => 'nullable|string',
+            'old_bcd' => 'nullable|numeric|min:0|max:150',
+            'new_bcd' => 'nullable|numeric|min:0|max:150',
+            'bcd_rate' => 'nullable|numeric|min:0|max:150',
+            'sws_rate' => 'nullable|numeric|min:0|max:100',
+            'igst_rate' => 'nullable|numeric|min:0|max:100',
+            'aidc_rate' => 'nullable|numeric|min:0|max:100',
+            'freight_total' => 'nullable|numeric|min:0',
+            'insurance_total' => 'nullable|numeric|min:0',
+            'target_selling_price' => 'nullable|numeric|min:0',
+            'custom_exchange_rate' => 'nullable|numeric|min:0',
+        ]);
+
+        $currency = $validated['currency'] ?? 'USD';
+        $quantity = (float) $validated['quantity'];
+        $unitFob = (float) $validated['unit_fob'];
+
+        $hsCode = null;
+        if (!empty($validated['hs_code'])) {
+            $cleanCode = preg_replace('/\s+/', '', (string) $validated['hs_code']);
+            $hsCode = HsCode::where('code', $cleanCode)->with('latestRevision')->first();
+        }
+
+        $oldBcd = (float) ($validated['old_bcd'] ?? $validated['bcd_rate'] ?? ($hsCode?->latestRevision?->old_rate ?? $hsCode?->base_bcd_rate ?? 10.0));
+        $newBcd = (float) ($validated['new_bcd'] ?? ($hsCode?->latestRevision?->new_rate ?? $oldBcd));
+        $sws = (float) ($validated['sws_rate'] ?? $hsCode?->sws_rate ?? 10.0);
+        $igst = (float) ($validated['igst_rate'] ?? $hsCode?->igst_rate ?? 18.0);
+        $aidc = (float) ($validated['aidc_rate'] ?? $hsCode?->aidc_rate ?? 0.0);
+
+        $result = $this->engine->compare(
+            unitFobUnit: $unitFob,
+            quantity: $quantity,
+            currency: $currency,
+            oldRates: ['bcd' => $oldBcd, 'sws' => $sws, 'igst' => $igst, 'aidc' => $aidc],
+            newRates: ['bcd' => $newBcd, 'sws' => $sws, 'igst' => $igst, 'aidc' => $aidc],
+            freightTotal: isset($validated['freight_total']) ? (float) $validated['freight_total'] : null,
+            insuranceTotal: isset($validated['insurance_total']) ? (float) $validated['insurance_total'] : null,
+            sellingPricePerUnit: isset($validated['target_selling_price']) ? (float) $validated['target_selling_price'] : null,
+            customExchangeRate: isset($validated['custom_exchange_rate']) ? (float) $validated['custom_exchange_rate'] : null
+        );
+
+        return response()->json([
+            'success' => true,
+            'hs_code' => $hsCode ? [
+                'code' => $hsCode->code,
+                'chapter' => $hsCode->chapter,
+                'description' => $hsCode->description,
+            ] : null,
+            'data' => $result,
+        ]);
+    }
+
     public function compare(Request $request): JsonResponse
     {
         $validated = $request->validate([

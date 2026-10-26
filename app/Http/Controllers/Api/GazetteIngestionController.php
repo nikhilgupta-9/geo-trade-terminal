@@ -21,14 +21,58 @@ class GazetteIngestionController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $circulars = RegulatoryCircular::withCount('revisions')
-            ->orderBy('issue_date', 'desc')
+        $query = RegulatoryCircular::withCount('revisions');
+
+        // Filter by authority / source (CBIC_CUSTOMS, DGFT, MINISTRY_COMMERCE)
+        $authority = $request->query('authority', $request->query('source'));
+        if ($authority && $authority !== 'ALL') {
+            $query->where('source', strtoupper($authority));
+        }
+
+        // Filter by exact date
+        if ($request->filled('date')) {
+            $date = Carbon::parse($request->query('date'))->format('Y-m-d');
+            $query->where(function ($q) use ($date) {
+                $q->whereDate('issue_date', $date)
+                  ->orWhereDate('effective_date', $date);
+            });
+        }
+
+        // Filter by date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('issue_date', '>=', Carbon::parse($request->query('from_date'))->format('Y-m-d'));
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('issue_date', '<=', Carbon::parse($request->query('to_date'))->format('Y-m-d'));
+        }
+
+        // Filter by status
+        if ($request->filled('status') && $request->query('status') !== 'ALL') {
+            $query->where('parse_status', strtoupper($request->query('status')));
+        }
+
+        // Search term
+        if ($request->filled('search')) {
+            $term = $request->query('search');
+            $query->where(function ($q) use ($term) {
+                $q->where('notification_number', 'LIKE', "%{$term}%")
+                  ->orWhere('title', 'LIKE', "%{$term}%");
+            });
+        }
+
+        $circulars = $query->orderBy('issue_date', 'desc')
             ->orderBy('id', 'desc')
             ->get();
 
         return response()->json([
             'success' => true,
             'count' => $circulars->count(),
+            'filters' => [
+                'authority' => $authority,
+                'date' => $request->query('date'),
+                'from_date' => $request->query('from_date'),
+                'to_date' => $request->query('to_date'),
+            ],
             'data' => $circulars,
         ]);
     }

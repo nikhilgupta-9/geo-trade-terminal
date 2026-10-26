@@ -156,4 +156,42 @@ class WatchlistController extends Controller
             'message' => "Removed HS Code {$code} from watchlist.",
         ]);
     }
+
+    /**
+     * Delete watchlist item by ID or HS Code from body/query.
+     */
+    public function remove(Request $request): JsonResponse
+    {
+        $userId = $request->query('user_id') ?? session('active_user_id') ?? Auth::id() ?? 2;
+
+        if ($request->filled('id')) {
+            $watchlist = UserWatchlist::where('user_id', $userId)->where('id', $request->input('id'))->first();
+        } elseif ($request->filled('hs_code')) {
+            $cleanCode = preg_replace('/\s+/', '', (string) $request->input('hs_code'));
+            $watchlist = UserWatchlist::where('user_id', $userId)
+                ->whereHas('hsCode', function ($q) use ($cleanCode) {
+                    $q->where('code', $cleanCode);
+                })->first();
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Specify either id or hs_code to remove.',
+            ], 422);
+        }
+
+        if (!$watchlist) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Watchlist entry not found.',
+            ], 404);
+        }
+
+        $code = $watchlist->hsCode?->code;
+        $watchlist->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Removed HS Code {$code} from watchlist.",
+        ]);
+    }
 }

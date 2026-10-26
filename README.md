@@ -1,14 +1,15 @@
-# Vectis Trade Intelligence Terminal (MVP)
+# Geo Trade Terminal (MVP)
 
 Institutional-grade regulatory and tariff intelligence engine designed for mid-market export-import houses, customs brokers (CHAs), and commodity traders.
 
 ---
 
 ## 1. System Architecture & Tech Stack
+* **Platform Name:** Geo Trade Terminal
 * **Backend Framework:** PHP 8.2+ / Laravel 12.x (Clean OOP, Strict Types)
 * **Database:** MySQL 8.0+ (InnoDB, strict foreign keys, stored generated column for tariff delta, indexed on HS codes and timestamps)
 * **Frontend:** Tailwind CSS v4, Alpine.js, Chart.js (Dark-First institutional terminal aesthetics `#0B0F17`)
-* **Queue & Task Scheduling:** Laravel Task Scheduler running `php artisan vectis:poll-gazette --parse` every minute via Linux Cron / cron runner.
+* **Queue & Task Scheduling:** Laravel Task Scheduler running `php artisan geo:poll-gazette --parse` every minute via Linux Cron / cron runner.
 
 ---
 
@@ -54,7 +55,7 @@ $$\text{Gross Margin \%} = \frac{\text{Selling Price} - \text{Landed Cost}}{\tex
 ---
 
 ## 5. CLI Commands
-* `php artisan vectis:poll-gazette {--parse}` - Scrapes circulars, parses tariff revisions, and dispatches alerts.
-* `php artisan vectis:parse-circular {id?}` - Manually triggers regex/AI parser on specific circular.
+* `php artisan geo:poll-gazette {--parse}` (alias: `vectis:poll-gazette`) - Scrapes circulars, parses tariff revisions, and dispatches alerts.
+* `php artisan geo:parse-circular {id?}` (alias: `vectis:parse-circular`) - Manually triggers regex/AI parser on specific circular.
 * `php artisan schedule:run` - Runs scheduled ingestion tasks.
 * `php artisan test` - Executes unit and feature test suites.

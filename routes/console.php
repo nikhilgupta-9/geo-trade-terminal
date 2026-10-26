@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('vectis:poll-gazette --parse')
+Schedule::command('geo:poll-gazette --parse')
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground();

@@ -20,7 +20,7 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('VECTIS');
+        $response->assertSee('GEO TRADE');
         $response->assertSee('TERMINAL');
     }
 }

@@ -18,17 +18,17 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Create Institutional Users
         $admin = User::firstOrCreate(
-            ['email' => 'admin@vectis.trade'],
+            ['email' => 'admin@geotrade.terminal'],
             [
                 'name' => 'Alexander Vance',
                 'role' => 'ADMIN',
-                'company' => 'Vectis Trade Intelligence HQ',
+                'company' => 'Geo Trade Terminal HQ',
                 'password' => Hash::make('password'),
             ]
         );
 
         $trader = User::firstOrCreate(
-            ['email' => 'trader@vectis.trade'],
+            ['email' => 'trader@geotrade.terminal'],
             [
                 'name' => 'Vikram Malhotra',
                 'role' => 'TRADER',
@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $cha = User::firstOrCreate(
-            ['email' => 'cha@vectis.trade'],
+            ['email' => 'cha@geotrade.terminal'],
             [
                 'name' => 'Rajesh Nambiar',
                 'role' => 'CHA',

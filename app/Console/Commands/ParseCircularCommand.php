@@ -10,7 +10,8 @@ use Illuminate\Console\Command;
 
 class ParseCircularCommand extends Command
 {
-    protected $signature = 'vectis:parse-circular {id? : Specific circular ID to re-parse}';
+    protected $signature = 'geo:parse-circular {id? : Specific circular ID to re-parse}';
+    protected $aliases = ['vectis:parse-circular'];
     protected $description = 'Trigger parser on pending or specific regulatory circulars';
 
     public function handle(GazetteParserService $parser): int

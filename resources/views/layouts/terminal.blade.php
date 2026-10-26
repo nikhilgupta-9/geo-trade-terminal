@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Vectis Trade Intelligence Terminal | Institutional Regulatory & Tariff Engine')</title>
+    <title>@yield('title', 'Geo Trade Terminal | Institutional Regulatory & Tariff Engine')</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,14 +21,14 @@
             <div class="flex items-center gap-4">
                 <a href="{{ route('terminal.index') }}" class="flex items-center gap-2 group">
                     <div class="w-7 h-7 rounded border border-[#00D2FF]/40 bg-[#00D2FF]/10 flex items-center justify-center font-mono-code font-bold text-[#00D2FF] text-sm shadow-[0_0_12px_rgba(0,210,255,0.2)]">
-                        V
+                        G
                     </div>
                     <div>
                         <div class="flex items-center gap-1.5 leading-none">
-                            <span class="font-bold tracking-wider text-base text-[#F8FAFC]">VECTIS</span>
+                            <span class="font-bold tracking-wider text-base text-[#F8FAFC]">GEO TRADE</span>
                             <span class="text-[#00D2FF] font-semibold text-xs tracking-widest px-1 py-0.5 rounded bg-[#00D2FF]/10 border border-[#00D2FF]/30">TERMINAL</span>
                         </div>
-                        <span class="text-[10px] text-[#94A3B8] font-mono-code tracking-tight">REGULATORY & TARIFF INTELLIGENCE</span>
+                        <span class="text-[10px] text-[#94A3B8] font-mono-code tracking-tight">GEOPOLITICAL & TARIFF INTELLIGENCE</span>
                     </div>
                 </a>
 
@@ -140,7 +140,7 @@
     <!-- Institutional Footer -->
     <footer class="border-t border-[#1E293B] bg-[#151B26] text-[11px] font-mono-code text-[#94A3B8] px-4 py-2 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-3">
-            <span class="text-slate-300 font-semibold">VECTIS TRADE INTELLIGENCE</span>
+            <span class="text-slate-300 font-semibold">GEO TRADE TERMINAL</span>
             <span>&bull;</span>
             <span>Valuation Rules: Customs Valuation (Determination of Value of Imported Goods) Rules, 2007</span>
             <span>&bull;</span>
@@ -151,7 +151,7 @@
             <span>&bull;</span>
             <span>Redis Queue: Active</span>
             <span>&bull;</span>
-            <span class="text-[#00D2FF]">&copy; {{ date('Y') }} Vectis Institutional Terminal</span>
+            <span class="text-[#00D2FF]">&copy; {{ date('Y') }} Geo Trade Terminal</span>
         </div>
     </footer>
 

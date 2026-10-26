@@ -10,7 +10,8 @@ use Illuminate\Console\Command;
 
 class PollGazetteNotifications extends Command
 {
-    protected $signature = 'vectis:poll-gazette {--parse : Automatically parse ingested notifications}';
+    protected $signature = 'geo:poll-gazette {--parse : Automatically parse ingested notifications}';
+    protected $aliases = ['vectis:poll-gazette'];
     protected $description = 'Poll CBIC and DGFT for new regulatory circulars, parse tariff revisions, and dispatch alerts';
 
     public function handle(GazetteScraperService $scraper, GazetteParserService $parser): int

@@ -1,6 +1,6 @@
 @extends('layouts.terminal')
 
-@section('title', 'Vectis Institutional Trade Terminal | Regulatory & Landed Cost Intelligence')
+@section('title', 'Geo Trade Terminal | Regulatory & Landed Cost Intelligence')
 
 @section('content')
 <div class="px-4 py-4 space-y-4 max-w-[1700px] mx-auto w-full" x-data="terminalApp()">
@@ -944,7 +944,7 @@ function terminalApp() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.simResult, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `vectis_simulation_hs_${this.simHsCode}.json`);
+            downloadAnchor.setAttribute("download", `geo_trade_simulation_hs_${this.simHsCode}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -1071,7 +1071,7 @@ function terminalApp() {
 
         async runGazetteSimulation() {
             this.isParsingGazette = true;
-            this.parserOutput = 'Submitting gazette notification to Vectis Ingestion Engine...';
+            this.parserOutput = 'Submitting gazette notification to Geo Trade Ingestion Engine...';
             try {
                 const res = await fetch('/api/v1/circulars/simulate', {
                     method: 'POST',

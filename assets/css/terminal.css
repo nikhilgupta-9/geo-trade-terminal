@@ -1,0 +1,226 @@
+/* GeoTrade Terminal — Bloomberg-grade institutional dark theme.
+   Shared across public pages, admin pages, and the login screen. */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --gt-canvas: #080B10;
+    --gt-panel: #0F141C;
+    --gt-panel-raised: #141A24;
+    --gt-border: #1E2633;
+    --gt-text: #E7ECF3;
+    --gt-text-dim: #8B98AC;
+    --gt-text-faint: #5A6578;
+    --gt-accent: #00D2FF;
+    --gt-warning: #F59E0B;
+    --gt-critical: #EF4444;
+    --gt-success: #22C55E;
+    --gt-mixed: #A78BFA;
+    --gt-font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+    --gt-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--gt-canvas);
+    color: var(--gt-text);
+    font-family: var(--gt-font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+a { color: var(--gt-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.tabular { font-variant-numeric: tabular-nums; font-family: var(--gt-font-mono); }
+
+/* ---------- Command bar ---------- */
+.gt-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: var(--gt-panel);
+    border-bottom: 1px solid var(--gt-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.gt-topbar__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em; }
+.gt-topbar__brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gt-accent); box-shadow: 0 0 8px var(--gt-accent); }
+.gt-topbar__nav { display: flex; gap: 20px; font-size: 13px; color: var(--gt-text-dim); }
+.gt-topbar__nav a { color: var(--gt-text-dim); }
+.gt-topbar__nav a:hover, .gt-topbar__nav a.active { color: var(--gt-text); text-decoration: none; }
+
+/* ---------- Layout ---------- */
+.gt-page { max-width: 1100px; margin: 0 auto; padding: 28px 24px 64px; }
+.gt-page--wide { max-width: 1400px; }
+.gt-page__header { margin-bottom: 24px; }
+.gt-page__title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+.gt-page__subtitle { color: var(--gt-text-dim); font-size: 13px; margin: 0; }
+
+/* ---------- Cards ---------- */
+.gt-card {
+    background: var(--gt-panel);
+    border: 1px solid var(--gt-border);
+    border-radius: 6px;
+    padding: 20px;
+}
+.gt-card--narrow { max-width: 380px; width: 100%; }
+.gt-card__title { margin: 0 0 2px; font-size: 18px; }
+.gt-card__subtitle { margin: 0 0 20px; color: var(--gt-text-dim); font-size: 13px; }
+.gt-centered { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- Report feed cards ---------- */
+.gt-report-card {
+    background: var(--gt-panel);
+    border: 1px solid var(--gt-border);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: block;
+    transition: border-color 0.15s;
+}
+.gt-report-card:hover { border-color: var(--gt-accent); text-decoration: none; }
+.gt-report-card__meta { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.gt-report-card__headline { font-size: 16px; font-weight: 600; color: var(--gt-text); margin: 0 0 8px; }
+.gt-report-card__event { font-size: 13px; color: var(--gt-text-dim); }
+.gt-report-card__date { font-size: 12px; color: var(--gt-text-faint); margin-left: auto; }
+
+/* ---------- Badges / pills ---------- */
+.gt-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--gt-border);
+    color: var(--gt-text-dim);
+}
+.gt-badge--timing-reactive { color: var(--gt-text-dim); }
+.gt-badge--timing-predictive { color: var(--gt-accent); border-color: var(--gt-accent); }
+
+.gt-badge--gainer, .gt-badge--risk_on { color: var(--gt-success); border-color: var(--gt-success); }
+.gt-badge--loser, .gt-badge--risk_off { color: var(--gt-critical); border-color: var(--gt-critical); }
+.gt-badge--mixed, .gt-badge--sector_rotation { color: var(--gt-mixed); border-color: var(--gt-mixed); }
+.gt-badge--watch, .gt-badge--neutral_uncertain { color: var(--gt-warning); border-color: var(--gt-warning); }
+
+.gt-badge--status-published { color: var(--gt-success); border-color: var(--gt-success); }
+.gt-badge--status-ai_drafted { color: var(--gt-text-dim); }
+.gt-badge--status-in_review { color: var(--gt-accent); border-color: var(--gt-accent); }
+.gt-badge--status-changes_requested { color: var(--gt-warning); border-color: var(--gt-warning); }
+.gt-badge--status-rejected { color: var(--gt-critical); border-color: var(--gt-critical); }
+
+/* ---------- Market direction banner ---------- */
+.gt-market-banner {
+    border-left: 3px solid var(--gt-accent);
+    background: var(--gt-panel-raised);
+    border-radius: 0 6px 6px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+.gt-market-banner--risk_on { border-color: var(--gt-success); }
+.gt-market-banner--risk_off { border-color: var(--gt-critical); }
+.gt-market-banner--sector_rotation { border-color: var(--gt-mixed); }
+.gt-market-banner--neutral_uncertain { border-color: var(--gt-warning); }
+.gt-market-banner__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gt-text-dim); margin-bottom: 8px; }
+.gt-market-banner__summary { margin: 0 0 10px; font-size: 14px; }
+.gt-market-banner__flow { margin: 0; font-size: 13px; color: var(--gt-text-dim); font-style: italic; }
+
+/* ---------- Industry impact rows ---------- */
+.gt-industry-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gt-border);
+}
+.gt-industry-row:last-child { border-bottom: none; }
+.gt-industry-row__name { flex: 0 0 200px; font-weight: 500; }
+.gt-industry-row__severity { display: flex; gap: 3px; }
+.gt-severity-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gt-border); }
+.gt-severity-dot.filled { background: currentColor; }
+.gt-industry-row__rationale { flex: 1; color: var(--gt-text-dim); font-size: 13px; }
+
+/* ---------- Company impact cards ---------- */
+.gt-company-card {
+    border: 1px solid var(--gt-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--gt-panel-raised);
+}
+.gt-company-card__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.gt-company-card__name { font-weight: 600; flex: 1; }
+.gt-company-card__ticker { color: var(--gt-text-faint); font-family: var(--gt-font-mono); font-size: 12px; }
+.gt-company-card__rationale { margin: 10px 0 0; font-size: 13px; color: var(--gt-text-dim); }
+.gt-company-card__detail { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gt-border); display: none; }
+.gt-company-card.expanded .gt-company-card__detail { display: block; }
+.gt-activity-item { font-size: 12px; color: var(--gt-text-dim); padding: 4px 0; }
+.gt-activity-item__period { color: var(--gt-text-faint); font-family: var(--gt-font-mono); margin-right: 8px; }
+
+/* ---------- Tables ---------- */
+.gt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gt-th { text-align: left; padding: 8px 10px; color: var(--gt-text-dim); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--gt-border); }
+.gt-td { padding: 10px; border-bottom: 1px solid var(--gt-border); }
+.gt-table tr:hover .gt-td { background: var(--gt-panel-raised); }
+
+/* ---------- Tabs ---------- */
+.gt-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--gt-border); margin-bottom: 20px; }
+.gt-tab { padding: 10px 16px; font-size: 13px; color: var(--gt-text-dim); cursor: pointer; border-bottom: 2px solid transparent; }
+.gt-tab.active { color: var(--gt-accent); border-color: var(--gt-accent); }
+.gt-tab:hover { color: var(--gt-text); }
+
+/* ---------- Forms / buttons ---------- */
+.gt-form { display: flex; flex-direction: column; gap: 14px; }
+.gt-label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--gt-text-dim); }
+.gt-input, .gt-textarea, .gt-select {
+    background: var(--gt-canvas);
+    border: 1px solid var(--gt-border);
+    border-radius: 4px;
+    padding: 9px 11px;
+    color: var(--gt-text);
+    font-family: var(--gt-font-ui);
+    font-size: 14px;
+}
+.gt-textarea { resize: vertical; min-height: 80px; }
+.gt-input:focus, .gt-textarea:focus, .gt-select:focus { outline: none; border-color: var(--gt-accent); }
+
+.gt-btn {
+    padding: 9px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--gt-border);
+    background: transparent;
+    color: var(--gt-text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.gt-btn:hover { border-color: var(--gt-text-dim); }
+.gt-btn--primary { background: var(--gt-accent); border-color: var(--gt-accent); color: #04121A; }
+.gt-btn--primary:hover { opacity: 0.9; }
+.gt-btn--success { border-color: var(--gt-success); color: var(--gt-success); }
+.gt-btn--success:hover { background: var(--gt-success); color: #04120A; }
+.gt-btn--warning { border-color: var(--gt-warning); color: var(--gt-warning); }
+.gt-btn--warning:hover { background: var(--gt-warning); color: #241904; }
+.gt-btn--danger { border-color: var(--gt-critical); color: var(--gt-critical); }
+.gt-btn--danger:hover { background: var(--gt-critical); color: #210505; }
+.gt-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.gt-alert { padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-bottom: 14px; }
+.gt-alert--error { background: rgba(239,68,68,0.1); border: 1px solid var(--gt-critical); color: var(--gt-critical); }
+.gt-alert--success { background: rgba(34,197,94,0.1); border: 1px solid var(--gt-success); color: var(--gt-success); }
+
+.gt-empty { color: var(--gt-text-faint); font-size: 13px; padding: 30px 0; text-align: center; }
+.gt-loading { color: var(--gt-text-faint); font-size: 13px; padding: 30px 0; text-align: center; }
+.gt-back-link { display: inline-block; margin-bottom: 16px; font-size: 13px; color: var(--gt-text-dim); }

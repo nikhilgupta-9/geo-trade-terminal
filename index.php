@@ -8,12 +8,11 @@ declare(strict_types=1);
  * can confirm the DB connection worked, right after a deploy. Delete or
  * replace once the real Bloomberg-style terminal UI lands.
  */
-require_once __DIR__ . '/config/database.php';
-
 $dbStatus = 'unknown';
 $dbDetail = '';
 
 try {
+    require_once __DIR__ . '/config/database.php';
     db();
     $dbStatus = 'connected';
 } catch (Throwable $e) {

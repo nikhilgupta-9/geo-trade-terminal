@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 /**
- * Central config. On Hostinger shared hosting this file sits OUTSIDE
- * public_html (one level up) so it is never served directly, even by
- * misconfiguration — public_html only contains index.php, ajax/*.php,
- * admin/*.php and assets/, all of which `require` this via a relative
- * path like `require __DIR__ . '/../config/config.php';`.
+ * Central config. This repo is deployed flat into public_html (no
+ * separate webroot folder), so config/, includes/, sql/ and cron/ are
+ * technically inside the web-served tree — direct web access to them is
+ * blocked by the deny-all .htaccess in each of those folders instead.
+ * Never remove those .htaccess files.
  *
  * Copy config.sample.php to config.php and fill in real credentials;
  * config.php itself should be in .gitignore so secrets never get committed.

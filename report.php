@@ -18,7 +18,7 @@ try {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vectis Intelligence Dossier — GeoTrade Terminal</title>
-<link rel="stylesheet" href="/assets/css/terminal.css">
+<link rel="stylesheet" href="assets/css/terminal.css">
 </head>
 <body>
   <div class="gt-topbar">
@@ -33,6 +33,6 @@ try {
     <div id="gt-report-detail" class="gt-loading">Loading intelligence dossier…</div>
   </div>
 
-  <script src="/assets/js/public.js"></script>
+  <script src="assets/js/public.js"></script>
 </body>
 </html>

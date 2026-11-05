@@ -17,6 +17,10 @@ window.terminalState = {
     predictiveScenario: 'alpha', // alpha or beta
 };
 
+// Base path resolver (works at domain root or inside a subfolder like /geo-trade-terminal/)
+const BASE_PATH = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+const apiUrl = (endpoint) => `${BASE_PATH}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+
 // Formatting helpers
 function formatCurrency(val, currency = 'USD') {
     if (val === null || val === undefined || isNaN(val)) return '$0.00';
@@ -134,7 +138,7 @@ async function loadReportsFeed() {
     
     try {
         if (loadingBadge) loadingBadge.classList.remove('hidden');
-        const res = await fetch('/ajax/reports.php');
+        const res = await fetch(apiUrl('/ajax/reports.php'));
         const data = await res.json();
         
         if (!res.ok || data.status !== 'ok') {
@@ -173,7 +177,7 @@ async function selectReport(reportId) {
     renderCrisisList(); // update active card highlight
 
     try {
-        const res = await fetch(`/ajax/report.php?id=${encodeURIComponent(reportId)}`);
+        const res = await fetch(apiUrl(`/ajax/report.php?id=${encodeURIComponent(reportId)}`));
         const data = await res.json();
         if (data.status === 'ok') {
             window.terminalState.selectedReport = data.report;
@@ -607,7 +611,7 @@ function setupCalculator() {
             calcBtn.disabled = true;
             calcBtn.innerHTML = 'CALCULATING VALUATION...';
 
-            const res = await fetch('/ajax/calculator.php', {
+            const res = await fetch(apiUrl('/ajax/calculator.php'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -644,7 +648,7 @@ function setupCalculator() {
             const query = e.target.value.trim();
             if (query.length < 2) return;
             try {
-                const res = await fetch(`/ajax/hs_codes.php?q=${encodeURIComponent(query)}`);
+                const res = await fetch(apiUrl(`/ajax/hs_codes.php?q=${encodeURIComponent(query)}`));
                 const data = await res.json();
                 if (data.status === 'ok' && data.data.length > 0) {
                     const first = data.data[0];

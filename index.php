@@ -30,7 +30,7 @@ try {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/css/terminal.css">
+  <link rel="stylesheet" href="assets/css/terminal.css">
 
   <script>
     tailwind.config = {
@@ -410,6 +410,6 @@ try {
   </div>
 
   <!-- Terminal JS Engine -->
-  <script src="/assets/js/terminal-app.js"></script>
+  <script src="assets/js/terminal-app.js"></script>
 </body>
 </html>

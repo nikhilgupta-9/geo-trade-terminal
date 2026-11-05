@@ -12,14 +12,16 @@ require_once __DIR__ . '/../includes/helpers.php';
  */
 try {
     require_once __DIR__ . '/../config/database.php';
-    $pdo = db();
+    $pdo = db(); // also runs any pending migrations -- see includes/migrate.php
     $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    $migrations = $pdo->query('SELECT migration, applied_at FROM schema_migrations ORDER BY id ASC')->fetchAll();
 
     json_response([
         'status' => 'ok',
         'db_connected' => true,
         'tables_found' => count($tables),
         'tables' => $tables,
+        'migrations_applied' => $migrations,
     ]);
 } catch (Throwable $e) {
     json_error('Health check failed: ' . $e->getMessage(), 500, 'HEALTH_CHECK_FAILED');

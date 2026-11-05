@@ -41,6 +41,14 @@ function db(): PDO
             error_log('DB connection failed: ' . $e->getMessage());
             throw new RuntimeException('Database connection failed: ' . $e->getMessage(), previous: $e);
         }
+
+        require_once __DIR__ . '/../includes/migrate.php';
+        try {
+            run_pending_migrations($pdo);
+        } catch (Throwable $e) {
+            error_log('Migration failed: ' . $e->getMessage());
+            throw new RuntimeException('Database migration failed: ' . $e->getMessage(), previous: $e);
+        }
     }
 
     return $pdo;

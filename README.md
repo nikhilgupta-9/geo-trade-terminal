@@ -23,18 +23,28 @@ ajax/admin/    reports.php, report.php, review.php, events.php (session-protecte
 admin/         login.php, logout.php, index.php (review queue/all reports/all events), report.php (review panel)
 index.php      public report feed (homepage)
 report.php     public report detail page
-sql/           schema.sql, seed.sql (duty engine sample data), seed_macro_reports.sql (report engine sample data)
+sql/migrations/  numbered .sql files, auto-applied on first page load after deploy -- see includes/migrate.php
 cron/          README.md (cPanel Cron Jobs setup, replaces Laravel queue workers)
 ```
+
+## Database migrations — automatic, no phpMyAdmin needed
+
+Every page load calls `db()`, which runs `run_pending_migrations()`
+(`includes/migrate.php`) before returning the connection. It tracks what's
+applied in a `schema_migrations` table and runs any `sql/migrations/NNNN_*.sql`
+file not yet in that table, in order, exactly once. To ship a schema or
+seed-data change: add a new file `sql/migrations/0004_whatever.sql` (next
+number up) and push to `main` — it applies itself the next time anyone
+hits the site. Never edit an already-applied migration file; add a new one.
 
 ## Setup on Hostinger
 
 1. Create a MySQL database + user in hPanel (Databases → MySQL Databases); note the generated `u123456789_...` names.
-2. Import, in order: phpMyAdmin → your DB → Import → `sql/schema.sql`, then `sql/seed.sql`, then `sql/seed_macro_reports.sql`.
-3. Upload this folder's contents to `public_html/` (or a subfolder) via File Manager or FTP.
-4. Copy `config/config.sample.php` → `config/config.php`, fill in the real DB host/name/user/pass hPanel gave you, and a `GEMINI_API_KEY` once Stage 3/5 AI drafting is wired up. **Never commit config.php.**
+2. Upload this folder's contents to `public_html/` (or a subfolder) via File Manager or FTP.
+3. Copy `config/config.sample.php` → `config/config.php`, fill in the real DB host/name/user/pass hPanel gave you, and a `GEMINI_API_KEY` once Stage 3/5 AI drafting is wired up. **Never commit config.php.**
+4. Visit `yourdomain.com/` — the first request connects to the DB and auto-runs every migration in `sql/migrations/` (creates all tables, seeds the admin user, HS-code sample, and the three example reports). No manual SQL import.
 5. Immediately change the seeded admin password (`admin@geotrade.local` / `ChangeMe123!`) — that hash must never reach a real deployment unchanged.
-6. Visit `yourdomain.com/ajax/health.php` to confirm the DB connection, then `yourdomain.com/` for the live report feed and `yourdomain.com/admin/login.php` to review/approve reports.
+6. `yourdomain.com/ajax/health.php` confirms the DB connection; `yourdomain.com/admin/login.php` is the review queue.
 
 ## What's NOT built yet
 

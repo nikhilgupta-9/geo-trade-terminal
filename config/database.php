@@ -2,14 +2,28 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/config.php';
-
 /**
  * Single shared PDO connection, lazily created. Every ajax/*.php and
  * admin/*.php script does `$pdo = db();` and uses prepared statements —
  * no ORM, no query builder, just PDO with exceptions on error so a bad
  * query surfaces immediately instead of silently returning false.
+ *
+ * Deliberately throws RuntimeException rather than calling die()/
+ * json_response() itself: this file is required from both JSON AJAX
+ * endpoints and plain HTML pages (index.php), and only the caller knows
+ * which response format is correct for a failure.
  */
+
+$configPath = __DIR__ . '/config.php';
+
+if (! file_exists($configPath)) {
+    throw new RuntimeException(
+        'config/config.php is missing. Copy config/config.sample.php to config/config.php and fill in real database credentials.'
+    );
+}
+
+require_once $configPath;
+
 function db(): PDO
 {
     static $pdo = null;
@@ -25,8 +39,7 @@ function db(): PDO
             ]);
         } catch (PDOException $e) {
             error_log('DB connection failed: ' . $e->getMessage());
-            http_response_code(500);
-            die(json_encode(['error' => 'Database connection failed.']));
+            throw new RuntimeException('Database connection failed: ' . $e->getMessage(), previous: $e);
         }
     }
 

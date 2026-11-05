@@ -29,9 +29,10 @@ define('APP_TIMEZONE', 'Asia/Kolkata');
 define('ADMIN_SESSION_KEY', 'geotrade_admin_id');
 define('ADMIN_SESSION_LIFETIME_SECONDS', 3600 * 8);
 
-// --- Anthropic (for AI-drafted report generation, Stage 5) ---
-define('ANTHROPIC_API_KEY', 'CHANGE_ME');
-define('ANTHROPIC_MODEL', 'claude-sonnet-5');
+// --- Google AI Studio / Gemini (for AI-drafted report generation, Stage 5,
+// and gazette-notification parsing, Stage 3) ---
+define('GEMINI_API_KEY', 'CHANGE_ME');
+define('GEMINI_MODEL', 'gemini-2.5-flash');
 
 date_default_timezone_set(APP_TIMEZONE);
 

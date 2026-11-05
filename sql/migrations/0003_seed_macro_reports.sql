@@ -13,6 +13,18 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- Cleanup first: an earlier version of this file broke mid-run on a
+-- semicolon-in-prose statement-splitting bug (fixed in includes/migrate.php),
+-- which could have partially committed the Venezuela event/report/impacts
+-- before failing. Delete by title before re-inserting so this file is safe
+-- to re-run from a partial state -- ON DELETE CASCADE on macro_reports,
+-- report_industry_impacts, report_company_impacts clears any orphaned rows.
+DELETE FROM macro_events WHERE title IN (
+    'Nicolas Maduro detained following US operation',
+    'US-brokered Russia-Ukraine peace framework talks advance',
+    'Uttar Pradesh 2027 state election'
+);
+
 -- ============================================================
 -- 1. Venezuela: Maduro detained
 -- ============================================================

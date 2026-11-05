@@ -14,13 +14,6 @@ declare(strict_types=1);
  * Cost per request when nothing is pending: one CREATE TABLE IF NOT
  * EXISTS, one SELECT, one glob() — a few milliseconds, acceptable for
  * shared hosting since there's no queue worker to run this out-of-band.
- *
- * SQL files are split on `;` and executed statement-by-statement on the
- * same PDO connection (not as one multi-statement query), so a seed file
- * can safely use session variables like `SET @x = LAST_INSERT_ID();`
- * across statements. This means a literal `;` inside a string value in a
- * migration file would incorrectly split the statement — none of our
- * migrations do that, but keep it in mind when writing new ones.
  */
 function run_pending_migrations(PDO $pdo): void
 {
@@ -46,7 +39,7 @@ function run_pending_migrations(PDO $pdo): void
     // very first run of this system, mark 0001/0002 as already applied
     // instead of re-running them -- 0002's duty_rates INSERT has no
     // unique constraint to dedupe against, so re-running it would
-    // duplicate duty-rate history rows.
+    // duplicate history rows.
     if ($isFirstRunEver) {
         $hasExistingAdminRow = (bool) $pdo->query(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'admin_users'"
@@ -75,18 +68,107 @@ function run_pending_migrations(PDO $pdo): void
             throw new RuntimeException("Could not read migration file: {$name}");
         }
 
-        foreach (explode(';', $sql) as $statement) {
-            // Drop full-line `-- comment` fragments, then skip anything
-            // left blank (pure comment blocks, trailing newline after the
-            // final `;`).
-            $statement = trim(preg_replace('/^\s*--.*$/m', '', $statement) ?? '');
-            if ($statement === '') {
-                continue;
-            }
+        $statements = array_filter(array_map('trim', split_sql_statements($sql)), static fn (string $s) => $s !== '');
 
-            $pdo->exec($statement);
+        // Wrapped in a transaction so a mid-file failure can't leave
+        // partial rows behind without the file being marked applied --
+        // without this, a broken statement halfway through a seed file
+        // would commit everything before it, and the retry on the next
+        // request would re-run from the top and duplicate those rows.
+        // (MySQL DDL such as CREATE TABLE still auto-commits regardless;
+        // this protects DML-only migrations, which is what seed files are.)
+        $pdo->beginTransaction();
+        try {
+            foreach ($statements as $statement) {
+                $pdo->exec($statement);
+            }
+            $pdo->prepare('INSERT INTO schema_migrations (migration) VALUES (:m)')->execute(['m' => $name]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw new RuntimeException("Migration {$name} failed: " . $e->getMessage(), previous: $e);
+        }
+    }
+}
+
+/**
+ * Splits a .sql file's contents into individual statements on `;`,
+ * ignoring any `;` that appears inside a single-quoted string, a
+ * double-quoted string, a backtick-quoted identifier, or a `-- ` line
+ * comment -- so seed data containing ordinary punctuation (rationale
+ * text, news summaries, etc.) never gets mis-split. Also strips
+ * full-line `-- comment` content from each statement. Does not handle
+ * `/* ... *\/` block comments or stored-procedure DELIMITER blocks --
+ * none of our migrations use either.
+ */
+function split_sql_statements(string $sql): array
+{
+    $statements = [];
+    $current = '';
+    $length = strlen($sql);
+    $inSingle = false;
+    $inDouble = false;
+    $inBacktick = false;
+    $inLineComment = false;
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $sql[$i];
+        $next = $i + 1 < $length ? $sql[$i + 1] : '';
+
+        if ($inLineComment) {
+            if ($char === "\n") {
+                $inLineComment = false;
+                $current .= $char;
+            }
+            continue;
         }
 
-        $pdo->prepare('INSERT INTO schema_migrations (migration) VALUES (:m)')->execute(['m' => $name]);
+        if (! $inSingle && ! $inDouble && ! $inBacktick && $char === '-' && $next === '-') {
+            $inLineComment = true;
+            $i++; // consume both dashes
+            continue;
+        }
+
+        if (! $inDouble && ! $inBacktick && $char === "'") {
+            if ($inSingle && $next === "'") { // escaped '' inside a single-quoted string
+                $current .= "''";
+                $i++;
+                continue;
+            }
+            $inSingle = ! $inSingle;
+            $current .= $char;
+            continue;
+        }
+
+        if (! $inSingle && ! $inBacktick && $char === '"') {
+            if ($inDouble && $next === '"') {
+                $current .= '""';
+                $i++;
+                continue;
+            }
+            $inDouble = ! $inDouble;
+            $current .= $char;
+            continue;
+        }
+
+        if (! $inSingle && ! $inDouble && $char === '`') {
+            $inBacktick = ! $inBacktick;
+            $current .= $char;
+            continue;
+        }
+
+        if (! $inSingle && ! $inDouble && ! $inBacktick && $char === ';') {
+            $statements[] = $current;
+            $current = '';
+            continue;
+        }
+
+        $current .= $char;
     }
+
+    if (trim($current) !== '') {
+        $statements[] = $current;
+    }
+
+    return $statements;
 }

@@ -17,12 +17,28 @@ declare(strict_types=1);
 $configPath = __DIR__ . '/config.php';
 
 if (! file_exists($configPath)) {
-    throw new RuntimeException(
-        'config/config.php is missing. Copy config/config.sample.php to config/config.php and fill in real database credentials.'
-    );
+    if (getenv('DB_DATABASE')) {
+        define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+        define('DB_NAME', getenv('DB_DATABASE') ?: 'vectis_trade_db');
+        define('DB_USER', getenv('DB_USERNAME') ?: 'root');
+        define('DB_PASS', getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '');
+        define('DB_CHARSET', 'utf8mb4');
+        define('APP_ENV', 'local');
+        define('APP_URL', 'http://127.0.0.1:8000');
+        define('APP_TIMEZONE', 'Asia/Kolkata');
+        define('ADMIN_SESSION_KEY', 'geotrade_admin_id');
+        define('ADMIN_SESSION_LIFETIME_SECONDS', 3600 * 8);
+        define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
+        define('GEMINI_MODEL', 'gemini-2.5-flash');
+        date_default_timezone_set(APP_TIMEZONE);
+    } else {
+        throw new RuntimeException(
+            'config/config.php is missing. Copy config/config.sample.php to config/config.php in Hostinger File Manager and fill in your MySQL database credentials.'
+        );
+    }
+} else {
+    require_once $configPath;
 }
-
-require_once $configPath;
 
 function db(): PDO
 {

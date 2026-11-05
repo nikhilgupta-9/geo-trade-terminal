@@ -27,8 +27,9 @@ try {
     }
 
     $sql = "SELECT
-                r.id, r.headline, r.market_stance, r.published_at,
-                e.id AS event_id, e.title AS event_title, e.category, e.timing, e.event_date, e.countries_json
+                r.id, r.headline, r.market_stance, r.market_summary, r.published_at,
+                e.id AS event_id, e.title AS event_title, e.category, e.timing, e.severity, e.event_date,
+                e.countries_json, e.resources_affected_json, e.scenarios_json
             FROM macro_reports r
             JOIN macro_events e ON e.id = r.event_id
             WHERE " . implode(' AND ', $where) . '
@@ -43,14 +44,18 @@ try {
             'id' => (int) $row['id'],
             'headline' => $row['headline'],
             'market_stance' => $row['market_stance'],
+            'market_summary' => $row['market_summary'] ?? '',
             'published_at' => $row['published_at'],
             'event' => [
                 'id' => (int) $row['event_id'],
                 'title' => $row['event_title'],
                 'category' => $row['category'],
                 'timing' => $row['timing'],
+                'severity' => $row['severity'] ?? 'high',
                 'event_date' => $row['event_date'],
-                'countries' => json_decode($row['countries_json'], true) ?? [],
+                'countries' => json_decode($row['countries_json'] ?? '[]', true) ?? [],
+                'resources_affected' => json_decode($row['resources_affected_json'] ?? '[]', true) ?? [],
+                'scenarios' => json_decode($row['scenarios_json'] ?? '{}', true) ?? null,
             ],
         ];
     }, $rows);

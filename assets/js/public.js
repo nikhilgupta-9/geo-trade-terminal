@@ -107,25 +107,58 @@ async function loadReportDetail() {
             </div>
         `).join('') || '<div class="gt-empty">No industry-level detail yet.</div>';
 
-        const companyHtml = r.company_impacts.map((c, idx) => `
-            <div class="gt-company-card" id="company-${idx}">
+        const companyHtml = r.company_impacts.map((c, idx) => {
+            const metrics = c.financial_metrics || {};
+            let metricsText = Object.entries(metrics).map(([k, v]) => `${k.replace(/_/g, ' ').toUpperCase()}: ${v}`).join(' • ');
+
+            return `
+            <div class="gt-company-card expanded" id="company-${idx}">
                 <div class="gt-company-card__head" onclick="document.getElementById('company-${idx}').classList.toggle('expanded')">
                     <span class="gt-badge gt-badge--${c.direction}">${escapeHtml(DIRECTION_LABELS[c.direction] || c.direction)}</span>
                     <span class="gt-company-card__name">${escapeHtml(c.company_name)}</span>
                     ${c.ticker ? `<span class="gt-company-card__ticker">${escapeHtml(c.ticker)}</span>` : ''}
-                    <span class="gt-text-dim" style="font-size:12px;">${escapeHtml(c.country)}</span>
+                    <span class="gt-text-dim" style="font-size:12px;">${escapeHtml(c.country)} ${c.market_cap ? '• Cap: ' + escapeHtml(c.market_cap) : ''}</span>
                 </div>
+                ${c.overview ? `<p style="font-size:12px;color:var(--gt-text-dim);margin:6px 0 10px;">${escapeHtml(c.overview)}</p>` : ''}
                 <p class="gt-company-card__rationale">${escapeHtml(c.rationale)}</p>
+                ${metricsText ? `<div style="font-family:var(--gt-font-mono);font-size:11px;color:var(--gt-accent);margin-bottom:8px;">${escapeHtml(metricsText)}</div>` : ''}
                 <div class="gt-company-card__detail">
-                    ${c.recent_activity.length ? `<strong style="font-size:12px;color:var(--gt-text-dim);">Recent activity</strong>` + c.recent_activity.map((a) => `
+                    ${c.recent_activity.length ? `<strong style="font-size:12px;color:var(--gt-text-dim);">Historical Multi-Year Activity Track Record</strong>` + c.recent_activity.map((a) => `
                         <div class="gt-activity-item"><span class="gt-activity-item__period">${escapeHtml(a.period)}</span>${escapeHtml(a.note)}</div>
-                    `).join('') : '<div class="gt-activity-item">No recent activity notes on file.</div>'}
+                    `).join('') : '<div class="gt-activity-item">No historical activity notes on file.</div>'}
                 </div>
             </div>
-        `).join('') || '<div class="gt-empty">No company-level detail yet.</div>';
+            `;
+        }).join('') || '<div class="gt-empty">No company-level detail yet.</div>';
+
+        const resourcesHtml = (r.event.resources_affected || []).length > 0
+            ? `<div style="margin-top:10px;"><strong style="font-size:11px;color:var(--gt-text-dim);">Affected Commodities / Resources:</strong> ` +
+              r.event.resources_affected.map(res => `<span class="gt-badge" style="background:#2d2105;border:1px solid #78350f;color:#fbbf24;margin-right:6px;">⚡ ${escapeHtml(res)}</span>`).join('') +
+              `</div>`
+            : '';
+
+        const scenariosHtml = r.event.scenarios && r.event.scenarios.scenario_alpha ? `
+            <div class="gt-card" style="margin-bottom:20px;border:1px solid #00D2FF;">
+                <h2 style="margin-top:0;font-size:14px;color:#00D2FF;">Predictive Scenario Radar</h2>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="background:#0F141C;padding:12px;border:1px solid #1E2633;border-radius:4px;">
+                        <span class="gt-badge gt-badge--gainer">Scenario Alpha (${escapeHtml(r.event.scenarios.scenario_alpha.probability)})</span>
+                        <div style="font-weight:700;margin:6px 0;">${escapeHtml(r.event.scenarios.scenario_alpha.name)}</div>
+                        <p style="font-size:12px;color:#94a3b8;">${escapeHtml(r.event.scenarios.scenario_alpha.summary)}</p>
+                        <div style="font-size:11px;color:#fbbf24;margin-top:6px;"><strong>Capital Flow:</strong> ${escapeHtml(r.event.scenarios.scenario_alpha.capital_flow)}</div>
+                    </div>
+                    <div style="background:#0F141C;padding:12px;border:1px solid #1E2633;border-radius:4px;">
+                        <span class="gt-badge gt-badge--mixed">Scenario Beta (${escapeHtml(r.event.scenarios.scenario_beta.probability)})</span>
+                        <div style="font-weight:700;margin:6px 0;">${escapeHtml(r.event.scenarios.scenario_beta.name)}</div>
+                        <p style="font-size:12px;color:#94a3b8;">${escapeHtml(r.event.scenarios.scenario_beta.summary)}</p>
+                        <div style="font-size:11px;color:#fbbf24;margin-top:6px;"><strong>Capital Flow:</strong> ${escapeHtml(r.event.scenarios.scenario_beta.capital_flow)}</div>
+                    </div>
+                </div>
+            </div>
+        ` : '';
 
         container.innerHTML = `
-            <a class="gt-back-link" href="/">&larr; All reports</a>
+            <a class="gt-back-link" href="/">&larr; Back to Terminal</a>
             <div class="gt-page__header">
                 <div class="gt-report-card__meta" style="margin-bottom:12px;">
                     <span class="gt-badge">${escapeHtml(CATEGORY_LABELS[r.event.category] || r.event.category)}</span>
@@ -134,13 +167,16 @@ async function loadReportDetail() {
                 </div>
                 <h1 class="gt-page__title">${escapeHtml(r.headline)}</h1>
                 <p class="gt-page__subtitle">${escapeHtml(r.event.title)} — ${escapeHtml((r.event.countries || []).join(', '))}</p>
+                ${resourcesHtml}
             </div>
 
             <div class="gt-market-banner gt-market-banner--${r.market_stance}">
-                <div class="gt-market-banner__label">Market Direction — ${escapeHtml(STANCE_LABELS[r.market_stance] || r.market_stance)}</div>
+                <div class="gt-market-banner__label">Market Direction // ${escapeHtml(STANCE_LABELS[r.market_stance] || r.market_stance)}</div>
                 <p class="gt-market-banner__summary">${escapeHtml(r.market_summary)}</p>
-                <p class="gt-market-banner__flow">${escapeHtml(r.market_flow_note)}</p>
+                <p class="gt-market-banner__flow"><strong>Capital Flow Vector:</strong> ${escapeHtml(r.market_flow_note)}</p>
             </div>
+
+            ${scenariosHtml}
 
             <div class="gt-card" style="margin-bottom:20px;">
                 <h2 style="margin-top:0;font-size:14px;">Event background</h2>
@@ -148,12 +184,12 @@ async function loadReportDetail() {
             </div>
 
             <div class="gt-card" style="margin-bottom:20px;">
-                <h2 style="margin-top:0;font-size:14px;">Industry impact</h2>
+                <h2 style="margin-top:0;font-size:14px;">Industry transmission mechanisms</h2>
                 ${industryHtml}
             </div>
 
             <div class="gt-card">
-                <h2 style="margin-top:0;font-size:14px;">Company impact</h2>
+                <h2 style="margin-top:0;font-size:14px;">Corporate impact ledger</h2>
                 ${companyHtml}
             </div>
         `;

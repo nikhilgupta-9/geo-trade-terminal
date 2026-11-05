@@ -3,3 +3,7 @@ config/config.php
 vendor/
 node_modules/
 *.log
+.phpunit.result.cache
+database/
+storage/
+bootstrap/

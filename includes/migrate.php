@@ -80,12 +80,24 @@ function run_pending_migrations(PDO $pdo): void
         $pdo->beginTransaction();
         try {
             foreach ($statements as $statement) {
-                $pdo->exec($statement);
+                try {
+                    $pdo->exec($statement);
+                } catch (PDOException $ex) {
+                    // Ignore duplicate column (1060) or duplicate key (1061) if an ALTER TABLE partially ran
+                    if (in_array((int) ($ex->errorInfo[1] ?? 0), [1060, 1061], true)) {
+                        continue;
+                    }
+                    throw $ex;
+                }
             }
             $pdo->prepare('INSERT INTO schema_migrations (migration) VALUES (:m)')->execute(['m' => $name]);
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
         } catch (Throwable $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw new RuntimeException("Migration {$name} failed: " . $e->getMessage(), previous: $e);
         }
     }
@@ -126,6 +138,20 @@ function split_sql_statements(string $sql): array
         if (! $inSingle && ! $inDouble && ! $inBacktick && $char === '-' && $next === '-') {
             $inLineComment = true;
             $i++; // consume both dashes
+            continue;
+        }
+
+        // Handle backslash escaping inside single-quoted strings: \' and \\
+        if ($inSingle && $char === '\\') {
+            $current .= $char . $next;
+            $i++;
+            continue;
+        }
+
+        // Handle backslash escaping inside double-quoted strings: \" and \\
+        if ($inDouble && $char === '\\') {
+            $current .= $char . $next;
+            $i++;
             continue;
         }
 
